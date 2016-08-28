@@ -27,6 +27,7 @@ import MQTTAsync;
 import MqttAsyncClient;
 import MqttException;
 import MqttActionListener;
+import MqttMessage;
 
 import std.stdio;
 import core.sync.condition;

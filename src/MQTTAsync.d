@@ -147,6 +147,15 @@ const MQTTASYNC_BAD_QOS = -9;
  * Return code: All 65535 MQTT msgids are being used
  */
 const MQTTASYNC_NO_MORE_MSGIDS = -10;
+/**
+ * Return code: the request is being discarded when not complete
+ */
+const MQTTASYNC_OPERATION_INCOMPLETE = -11;
+/**
+ * Return code: no more messages can be buffered
+ */
+const MQTTASYNC_MAX_BUFFERED_MESSAGES = -12;
+
 
 /**
  * Default MQTT version to connect with.  Use 3.1.1 then fall back to 3.1
@@ -540,6 +549,9 @@ struct MQTTAsync_connectOptions
 	int serverURIcount;
 	char **serverURIs;
 	int MQTTVersion;
+	int automaticReconnect = 0;
+	int minRetryInterval = 1;
+	int maxRetryInterval = 60;
 }
 
 /**
