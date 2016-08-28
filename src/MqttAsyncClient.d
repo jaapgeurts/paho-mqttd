@@ -6,15 +6,15 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2015 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2015-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -37,7 +37,7 @@ import core.memory;
 /////////////////////////////////////////////////////////////////////////////
 // Callbacks from the C library.
 //
-// Note that the Garbage Collector lockdown technique for C callbacks is 
+// Note that the Garbage Collector lockdown technique for C callbacks is
 // described in the Phobos documentation, here:
 // http://dlang.org/phobos/core_memory.html#.GC.addRoot
 //
@@ -60,9 +60,9 @@ extern (C)
 		//tok.onComplete(MQTTASYNC_SUCCESS);
 	}
 	/**
-	 * Callback from an unsuccessful connection. 
+	 * Callback from an unsuccessful connection.
 	 * @param context Pointer to the locked down token object.
-	 * @param response 
+	 * @param response
 	 */
 	int onMessageArrivedCallback(void *context, char *topicName, int topicLen, MQTTAsync_message *msg)
 	{
@@ -100,17 +100,37 @@ extern (C)
 
 /////////////////////////////////////////////////////////////////////////////
 
-class MqttAsyncClient 
+/**
+ * An asynchronous MQTT connection client.
+ *
+ */
+class MqttAsyncClient
 {
+	/** The address/URI of the broker */
 	private string serverURI;
+	/** The client ID for the connection */
 	private string clientId;
+	/** The underlying C connection client */
 	private MQTTAsync cli = null;
+	/** A user-supplied callback object */
 	private MqttCallback callback = null;
+
+	/**
+	 * Helper to check a return value from the C library.
+	 * This will create and throw an exception if the return code indicated
+	 * an error.
+	 * @param ret The return code from the C library. A value of 0 is
+	 *  		  success, <0 is an error.
+	 */
 	private void chkRet(int ret) {
 		if (ret != 0)
 			throw new MqttException(ret);
 	}
-
+	/**
+	 * Creates an asynchronous MQTT client object.
+	 * @param serverURI The URI of the MQTT broker.
+	 * @param clientId The unique identifier for this client.
+	 */
 	this(string serverURI, string clientId) {
 		this.serverURI = serverURI;
 		this.clientId = clientId;
@@ -124,27 +144,39 @@ class MqttAsyncClient
 		write("  ");
 		writeln(cast(string) msg.getPayload());
 	}
-
+	/**
+	 * Gets the underlying C client object
+	 * @return The underlying C client object
+	 */
 	MQTTAsync handle() { return cli; }
+	/**
+	 * Determines if this object has been created sucessfully.
+	 * @return @em true if this object has been created sucessfully, @em
+	 *  	   false if there was an error upon creation.
+	 */
 	bool isOK() { return cli != null; }
-
+	/**
+	 * Sets an asynchronous callback object.
+	 *
+	 * @param cb
+	 */
 	void setCallback(MqttCallback cb) {
 		this.callback = cb;
 		void* context = cast(void*) this;
-		MQTTAsync_setCallbacks(cli, context, &onConnectionLostCallback, 
+		MQTTAsync_setCallbacks(cli, context, &onConnectionLostCallback,
 							   &onMessageArrivedCallback, &onDeliveryCompleteCallback);
 	}
 	/**
-	 * Determines if this client is currently connected to a message 
-	 * broker/server. 
-	 * @return @em true if if this client is currently connected to a 
+	 * Determines if this client is currently connected to a message
+	 * broker/server.
+	 * @return @em true if if this client is currently connected to a
 	 *  	   server, @em false if not.
 	 */
 	bool isConnected() { return MQTTAsync_isConnected(cli) != 0; }
 
 	/**
 	 * Connects to an MQTT server using the default options.
-	 * @return token used to track and wait for the connect to complete. The 
+	 * @return token used to track and wait for the connect to complete. The
 	 *  	   token will be passed to any callback that has been set.
 	 * @throw MqttException for non security related problems
 	 * @throw security_exception for security related problems
@@ -171,7 +203,7 @@ class MqttAsyncClient
 		return connect(null, null, null);
 	}
 
-	MqttToken connect(MqttConnectOptions opts, Object userContext, 
+	MqttToken connect(MqttConnectOptions opts, Object userContext,
 					  IMqttActionListener listener) {
 		auto opt = (opts is null) ? MQTTAsync_connectOptions() : opts.getOptions();
 		auto tok = new MqttToken(this, userContext, listener);
@@ -243,7 +275,7 @@ class MqttAsyncClient
 		return subscribe(topic, qos, null, null);
 	}
 
-	MqttToken subscribe(string topic, int qos, Object userContext, 
+	MqttToken subscribe(string topic, int qos, Object userContext,
 						IMqttActionListener listener) {
 		auto opt = new MQTTAsync_responseOptions;
 		auto tok = new MqttToken(this, null, listener);
@@ -268,7 +300,7 @@ class MqttAsyncClient
 		return unsubscribe(topic, null, null);
 	}
 
-	MqttToken unsubscribe(string topic, Object userContext, 
+	MqttToken unsubscribe(string topic, Object userContext,
 						  IMqttActionListener listener) {
 		auto opt = new MQTTAsync_responseOptions;
 		auto tok = new MqttToken(this, userContext, listener);

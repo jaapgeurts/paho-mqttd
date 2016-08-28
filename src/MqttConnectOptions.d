@@ -1,20 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
 /// @file MqttConnectOptions.d
-/// Declaration of MQTT async_client class
+/// Definition of MqttConnectOptions class
 /// @date April 24, 2015
 /// @author Frank Pagliughi
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2015 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2015-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -29,8 +29,8 @@ import core.time;
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Holds the set of options that control how the client connects to a 
- * server. 
+ * Holds the set of options that control how the client connects to a
+ * server.
  */
 class MqttConnectOptions
 {

@@ -1,5 +1,22 @@
 // AsyncPublisher.d
 //
+
+/*******************************************************************************
+ * Copyright (c) 2015-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
+ *
+ * The Eclipse Public License is available at
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * Contributors:
+ *    Frank Pagliughi - initial implementation and documentation
+ *******************************************************************************/
+
 // Compile with:
 //		gdc-4.9 -o AsyncPublisher AsyncPublisher.d  AsyncClient.d MQTTAsync.d \
 // 			~/mqtt/org.eclipse.paho.mqtt.c/build/output/libpaho-mqtt3a.so
@@ -19,11 +36,11 @@ import core.thread;
 class ConnListener : IMqttActionListener
 {
 	override void onSuccess(IMqttToken tok) {
-		writeln("Connection complete");
+		writeln("  Connection complete");
 	}
 
 	override void onFailure(IMqttToken tok, Throwable exc) {
-		writeln("Connection failed");
+		writeln("  Connection failed");
 	}
 }
 
@@ -41,31 +58,25 @@ int main()
 			return 1;
 		}
 
-		write("Connecting...");
-		stdout.flush();
-		auto connListener = new ConnListener;
-		MqttToken tok = cli.connect(null, null, connListener);
+		writeln("Connecting...");
+		MqttToken tok = cli.connect(null, null, new ConnListener);
 		tok.waitForCompletion();
-		writeln("OK");
+		writeln("...OK");
 
-		//Thread.sleep(dur!("seconds")(5));
-
-		write("Sending a message...");
-		stdout.flush();
+		writeln("Sending a message...");
 		MqttDeliveryToken dtok = cli.publish("hello", "Hello World", QOS, false);
 		dtok.waitForCompletion();
 
-		write("OK\nSending another message...");
-		stdout.flush();
+		writeln("...OK\nSending another message...");
 		auto msg = new MqttMessage("Hi There", QOS);
 		dtok = cli.publish("hello", msg);
 		dtok.waitForCompletion();
 
-		write("OK\nDisconnecting...");
+		writeln("...OK\nDisconnecting...");
 		stdout.flush();
 		tok = cli.disconnect();
 		tok.waitForCompletion();
-		writeln("OK\nDone");
+		writeln("...OK\nDone");
 
 		return 0;
 	}
