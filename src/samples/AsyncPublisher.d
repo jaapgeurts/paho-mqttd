@@ -23,6 +23,8 @@
 //
 
 import MqttAsyncClient;
+import MqttConnectOptions;
+import MqttWillOptions;
 import MqttMessage;
 import MqttToken;
 import MqttException;
@@ -30,6 +32,7 @@ import MqttActionListener;
 
 import std.stdio;
 import core.thread;
+import core.time;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -48,18 +51,25 @@ class ConnListener : IMqttActionListener
 
 int main()
 {
-	const int QOS = 1;
+	const int		QOS = 1;
+	const string	HOST = "tcp://localhost:1883";
+	const string	CLIENT_ID = "AsyncClient.d";
 
 	try {
-		auto cli = new MqttAsyncClient("tcp://localhost:1883", "AsyncClient.d");
+		writeln("Initializing...");
+		auto cli = new MqttAsyncClient(HOST, CLIENT_ID);
 
 		if (!cli.isOK()) {
 			writeln("Error creating client.");
 			return 1;
 		}
 
+		auto willOpts = new MqttWillOptions("hello", "Connection Lost");
+		auto connOpts = new MqttConnectOptions(60.seconds());
+		connOpts.setWillOptions(willOpts);
+
 		writeln("Connecting...");
-		MqttToken tok = cli.connect(null, null, new ConnListener);
+		MqttToken tok = cli.connect(connOpts, null, new ConnListener);
 		tok.waitForCompletion();
 		writeln("...OK");
 

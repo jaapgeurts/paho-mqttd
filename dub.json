@@ -16,8 +16,8 @@
 			"name": "paho-mqttd-posix",
 			"platforms": ["posix"],
 			"preBuildCommands": [
-				"cd lib ; rm -f libpaho-mqttd.so libpaho-mqttd.so.0",
-				"cd lib ; mv libpaho-mqttd.so.0.1 libpaho-mqttd.so"
+				"if [ -d lib ]; then cd lib ; rm -f libpaho-mqttd.so libpaho-mqttd.so.0 ; fi",
+				"if [ -e lib/libpaho-mqttd.so.0.1 ]; then cd lib ; mv libpaho-mqttd.so.0.1 libpaho-mqttd.so; fi"
 			],
 			"postBuildCommands": [
 				"cd lib ; mv libpaho-mqttd.so libpaho-mqttd.so.0.1",

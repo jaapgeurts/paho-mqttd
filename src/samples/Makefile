@@ -24,10 +24,10 @@ COMPILE.d = $(DC) $(DFLAGS) $(TARGET_ARCH)
 
 ifeq ($(DC), gdc)
   %: %.d
-	$(COMPILE.d) $(OUTPUT_OPTION) $< -I.. -L.. -lpaho-mqttd -L$(PAHO_C_LIB)/build/output -lpaho-mqtt3a
+	$(COMPILE.d) $(OUTPUT_OPTION) $< -I.. -L../../lib -lpaho-mqttd -L$(PAHO_C_LIB)/build/output -lpaho-mqtt3a
 else
   %: %.d
-	$(COMPILE.d) $(OUTPUT_OPTION) $< -I.. -L-l:../libpaho-mqttd.so -L-l:$(PAHO_C_LIB)/build/output/libpaho-mqtt3a.so -defaultlib=libphobos2.so
+	$(COMPILE.d) $(OUTPUT_OPTION) $< -I.. -L-l:../../lib/libpaho-mqttd.so -L-l:$(PAHO_C_LIB)/build/output/libpaho-mqtt3a.so -defaultlib=libphobos2.so
 endif
 
 .PHONY: clean
