@@ -29,6 +29,9 @@ import core.time;
 
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Options for the Last Will and Testament message.
+ */
 class MqttWillOptions
 {
 	/** The underlying C struct for will options  */
@@ -37,7 +40,6 @@ class MqttWillOptions
 	private string topic;
 	/** The payload for the LWT message  */
 	private string payload;
-
 	/**
 	 * Constructs LWT options.
 	 * @param topic The topic for the LWT message.

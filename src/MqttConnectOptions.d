@@ -23,6 +23,7 @@
 
 import MQTTAsync;
 import MqttWillOptions;
+import MqttSSLOptions;
 import std.stdio;
 import std.string;
 import std.conv;
@@ -44,6 +45,9 @@ class MqttConnectOptions
 	private string passwd;
 	/** The LWT message, if any */
 	private MqttWillOptions willOpts;
+	/** The SSL/TSL options, if any */
+	private MqttSSLOptions sslOptions;
+
 	/**
 	 * Create connection options with the specified keep alive interval.
 	 * @param keepAliveInterval The keep alive interval for the connection.
@@ -51,7 +55,11 @@ class MqttConnectOptions
 	this(Duration keepAliveInterval) {
 		opts.keepAliveInterval = cast(int) keepAliveInterval.total!"seconds";
 	}
-
+	/**
+	 * Creates the connection options.
+	 * @param userName The user name for connecting to the broker.
+	 * @param passwd The password for connecting to the broker.
+	 */
 	this(string userName, string passwd) {
 		setUserName(userName);
 		setPassword(passwd);
@@ -92,6 +100,13 @@ class MqttConnectOptions
 		this.willOpts = willOpts;
 		this.opts.will = this.willOpts.getOptionsPtr();
 	}
-
+	/**
+	 * Sets the SSL/TSL options for the connection.
+	 * @param sslOptions The SSL/TSL options.
+	 */
+	void setSSLOptions(MqttSSLOptions sslOptions) {
+		this.sslOptions = sslOptions;
+		this.opts.ssl = this.sslOptions.getOptionsPtr();
+	}
 }
 

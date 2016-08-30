@@ -517,11 +517,11 @@ struct MQTTAsync_SSLOptions
 {
 	immutable char[4] struct_id = "MQTS";
 	int struct_version = 0;
-	char *trustStore;
-	char *keyStore;
-	char *privateKey;
-	char *privateKeyPassword;
-	char *enabledCipherSuites;
+	const(char)* trustStore;
+	const(char)* keyStore;
+	const(char)* privateKey;
+	const(char)* privateKeyPassword;
+	const(char)* enabledCipherSuites;
 	int enableServerCertAuth = 1;
 }
 
