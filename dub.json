@@ -10,7 +10,6 @@
 	"targetType": "dynamicLibrary",
 	"targetPath": "./lib/",
 	"libs": ["paho-mqtt3a"],
-	"excludedSourceFiles": ["src/samples/*.d"],
 	"configurations": [
 		{
 			"name": "paho-mqttd-posix",
@@ -24,6 +23,28 @@
 				"cd lib ; ln -s libpaho-mqttd.so.0.1 libpaho-mqttd.so.0",
 				"cd lib ; ln -s libpaho-mqttd.so.0 libpaho-mqttd.so"
 			]
+		}
+	],
+	"subPackages": [
+		{
+			"name": "AsyncPublisher",
+			"description": "Simple Paho MQTT example for message publishing",
+			"targetType": "executable",
+			"targetName": "paho_mqttd_pub",
+			"sourceFiles": [ "samples/AsyncPublisher.d" ],
+			"dependencies": {
+				"paho-mqttd": { "path": "." }
+			}
+		},
+		{
+			"name": "AsyncSubscribe",
+			"description": "Simple Paho MQTT example for message subscription",
+			"targetType": "executable",
+			"targetName": "paho_mqttd_sub",
+			"sourceFiles": [ "samples/AsyncSubscribe.d" ],
+			"dependencies": {
+				"paho-mqttd": { "path": "." }
+			}
 		}
 	]
 }
