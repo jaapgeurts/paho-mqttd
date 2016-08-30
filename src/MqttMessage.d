@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 /// @file Message.d
 /// Definition of MqttMessage class
-/// @date Feb 21, 2015 
+/// @date Feb 21, 2015
 /// @author Frank Pagliughi
 /////////////////////////////////////////////////////////////////////////////
 
@@ -63,6 +63,7 @@ class MqttMessage
 	}
 	/**
 	 * Creates a message from a C library message structure.
+	 * This does a deep copy of the message payload.
 	 * @param msg An MQTT C library message structure.
 	 */
 	this(MQTTAsync_message msg) {
@@ -146,6 +147,12 @@ class MqttMessage
 	blob getPayload() immutable { return payload; }
 	blob getPayload() { return payload; }
 	/**
+	 * Gets a string representation of the message payload.
+	 * @return A string representation of the message payload.
+	 */
+	string getPayloadStr() immutable { return cast(string) payload[0..$]; }
+	string getPayloadStr() { return cast(string) payload[0..$]; }
+	/**
 	 * Returns the quality of service for this message.
 	 * @return The quality of service for this message.
 	 */
@@ -185,8 +192,8 @@ class MqttMessage
 	 * Sets the quality of service for this message.
 	 * @param qos The quality of service for this message.
 	 */
-	void setQos(int qos) { //throw(std::invalid_argument) {
-		//validate_qos(qos);
+	void setQos(int qos) {
+		// TODO: validate the qos 0<= qos <=2
 		msg.qos = qos;
 	}
 	/**
@@ -199,15 +206,7 @@ class MqttMessage
 	 * Gets a string representation of the message payload.
 	 * @return A string representation of the message payload.
 	 */
-	string toStr() const { return to!string(payload); }
-	/**
-	 * Determines if the QOS value is a valid one.
-	 * @param qos The QOS value.
-	 * @throw std::invalid_argument If the qos value is invalid.
-	 */
-//	static void validate_qos(int qos) throw(std::invalid_argument) {
-//		if (qos < 0 || qos > 2)
-//			throw exception(QOS invalid);	//std::invalid_argument("QOS invalid");
-//	}
+	string toStr() immutable { return cast(string) payload[0..$]; }
+	string toStr() { return cast(string) payload[0..$]; }
 }
 

@@ -1,4 +1,6 @@
-// AsyncPublisher.d
+// async_sub.d
+//
+// Eclipse Paho D Library sample application for subscribing.
 //
 
 /*******************************************************************************
@@ -34,12 +36,16 @@ import core.thread;
 
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Override an MqttCallback interface to get messages as they arrive.
+ */
 class Callback : MqttCallback
 {
 	override void connectionLost(const string cause) {}
 
 	override void messageArrived(const string topic, MqttMessage msg) {
-		writeln("Callback: Message arrived");
+		string s = msg.toStr();
+		writefln("%s: %s", topic, s);
 	}
 
 	override void deliveryComplete(MqttDeliveryToken tok) {}
@@ -49,18 +55,21 @@ class Callback : MqttCallback
 
 int main()
 {
-	const int QOS = 1;
+	const int		QOS = 1;
+	const string	HOST = "tcp://localhost:1883";
+	const string	CLIENT_ID = "async_sub.d.client";
+
+	writeln("Eclipse Paho MQTT D library sample subscriber\n");
 
 	try {
-		auto cli = new MqttAsyncClient("tcp://localhost:1883", "AsyncSubscribe.d");
+		auto cli = new MqttAsyncClient(HOST, CLIENT_ID);
 
 		if (!cli.isOK()) {
 			writeln("Error creating client.");
 			return 1;
 		}
 
-		Callback cb;
-		cli.setCallback(cb);
+		cli.setCallback(new Callback);
 
 		write("Connecting...");
 		stdout.flush();

@@ -75,7 +75,8 @@ extern (C)
 		string topic = to!string(topicName);
 		auto m = new MqttMessage(*msg);
 
-		cli.onMessageArrived(topic, cast(immutable) m);
+		//cli.onMessageArrived(topic, cast(immutable) m);
+		cli.onMessageArrived(topic, m);
 
 		MQTTAsync_freeMessage(&msg);
 		MQTTAsync_free(topicName);
@@ -96,7 +97,6 @@ extern (C)
 		//tok.onComplete(retCode);
 	}
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -137,12 +137,15 @@ class MqttAsyncClient
 		chkRet(MQTTAsync_create(&cli, std.string.toStringz(serverURI),
 					 std.string.toStringz(clientId), MQTTCLIENT_PERSISTENCE_NONE, null));
 	}
-
-	private void onMessageArrived(string topic, immutable MqttMessage msg) {
-		write("Message Arrived on topic: ");
-		write(topic);
-		write("  ");
-		writeln(cast(string) msg.getPayload());
+	/**
+	 * Callback handler for incoming messages on this client.
+	 * @param topic The topic on which the message arrived.
+	 * @param msg The message.
+	 */
+	private void onMessageArrived(string topic, MqttMessage msg) {
+		if (this.callback !is null) {
+			this.callback.messageArrived(topic, msg);
+		}
 	}
 	/**
 	 * Gets the underlying C client object

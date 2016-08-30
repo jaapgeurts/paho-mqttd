@@ -1,4 +1,6 @@
-// AsyncPublisher.d
+// async_pub.d
+//
+// Eclipse Paho D Library sample application for publishing.
 //
 
 /*******************************************************************************
@@ -16,11 +18,6 @@
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
-
-// Compile with:
-//		gdc-4.9 -o AsyncPublisher AsyncPublisher.d  AsyncClient.d MQTTAsync.d \
-// 			~/mqtt/org.eclipse.paho.mqtt.c/build/output/libpaho-mqtt3a.so
-//
 
 import MqttAsyncClient;
 import MqttConnectOptions;
@@ -53,7 +50,7 @@ int main()
 {
 	const int		QOS = 1;
 	const string	HOST = "tcp://localhost:1883";
-	const string	CLIENT_ID = "AsyncClient.d";
+	const string	CLIENT_ID = "async_pub.d.client";
 
 	try {
 		writeln("Initializing...");
