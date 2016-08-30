@@ -27,21 +27,21 @@
 	],
 	"subPackages": [
 		{
-			"name": "AsyncPublisher",
+			"name": "async_pub",
 			"description": "Simple Paho MQTT example for message publishing",
 			"targetType": "executable",
-			"targetName": "paho_mqttd_pub",
-			"sourceFiles": [ "samples/AsyncPublisher.d" ],
+			"targetName": "async_pub",
+			"sourceFiles": [ "samples/async_pub.d" ],
 			"dependencies": {
 				"paho-mqttd": { "path": "." }
 			}
 		},
 		{
-			"name": "AsyncSubscribe",
+			"name": "async_sub",
 			"description": "Simple Paho MQTT example for message subscription",
 			"targetType": "executable",
-			"targetName": "paho_mqttd_sub",
-			"sourceFiles": [ "samples/AsyncSubscribe.d" ],
+			"targetName": "async_sub",
+			"sourceFiles": [ "samples/async_sub.d" ],
 			"dependencies": {
 				"paho-mqttd": { "path": "." }
 			}
