@@ -1,6 +1,7 @@
-// async_sub.d
+// thr_sub.d
 //
-// Eclipse Paho D Library sample application for subscribing.
+// Eclipse Paho D Library sample application for subscribing using a thread
+// to process incoming messages.
 //
 
 /*******************************************************************************
@@ -19,11 +20,6 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-// Compile with:
-//		gdc-4.9 -o AsyncSubscribe AsyncPublisher.d  AsyncClient.d MQTTAsync.d \
-// 			~/mqtt/org.eclipse.paho.mqtt.c/build/output/libpaho-mqtt3a.so
-//
-
 import MqttAsyncClient;
 import MqttMessage;
 import MqttToken;
@@ -32,23 +28,31 @@ import MqttCallback;
 import MqttActionListener;
 
 import std.stdio;
+import std.concurrency;
+import std.typecons;
 import core.thread;
 
 /////////////////////////////////////////////////////////////////////////////
 
-/**
- * Override an MqttCallback interface to get messages as they arrive.
- */
-class Callback : MqttCallback
+// Thread function to receive and process incoming messages.
+// The client will send messages to us as they arrive with a tuple
+// containing the string topic and a rebinable reference to an immutable
+// message.
+
+void msgThreadFunc()
 {
-	override void connectionLost(const string cause) {}
+	bool run = true;
+	writeln("Started message thread.");
 
-	override void messageArrived(const string topic, immutable MqttMessage msg) {
-		string s = msg.getPayloadStr();
-		writefln("%s: %s", topic, s);
+	while (run) {
+		receive(
+			(string topic, Rebindable!(immutable(MqttMessage)) msg) {
+				string s = msg.getPayloadStr();
+				writefln("%s: %s", topic, s);
+			},
+			(OwnerTerminated ot) { run = false; }
+		);
 	}
-
-	override void deliveryComplete(MqttDeliveryToken tok) {}
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -57,9 +61,9 @@ int main()
 {
 	const int		QOS = 1;
 	const string	HOST = "tcp://localhost:1883";
-	const string	CLIENT_ID = "async_sub.d.client";
+	const string	CLIENT_ID = "thr_sub.d.client";
 
-	writeln("Eclipse Paho MQTT D library sample subscriber\n");
+	writeln("Eclipse Paho MQTT D library sample thread subscriber\n");
 
 	try {
 		auto cli = new MqttAsyncClient(HOST, CLIENT_ID);
@@ -69,27 +73,25 @@ int main()
 			return 1;
 		}
 
-		cli.setCallback(new Callback);
+		// Create a thread to receive incoming messages
+		Tid msgTid = spawn(&msgThreadFunc);
+		cli.setMessageThread(msgTid);
 
-		write("Connecting...");
-		stdout.flush();
+		writeln("Connecting...");
 		MqttToken tok = cli.connect();
 		tok.waitForCompletion();
-		writeln("OK");
+		writeln("...OK");
 
-		write("Subscribing...");
-		stdout.flush();
-		tok = cli.subscribe("hello", QOS);
-		tok.waitForCompletion();
-		writeln("OK");
+		writeln("Subscribing...");
+		cli.subscribe("hello", QOS).waitForCompletion();
+		writeln("...OK");
 
-		Thread.sleep(60.seconds());
+		Thread.sleep(30.seconds());
 
-		write("\nDisconnecting...");
-		stdout.flush();
+		writeln("\nDisconnecting...");
 		tok = cli.disconnect();
 		tok.waitForCompletion();
-		writeln("OK\nDone");
+		writeln("...OK\n\nDone");
 
 		return 0;
 	}

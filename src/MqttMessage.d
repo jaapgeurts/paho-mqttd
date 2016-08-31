@@ -68,9 +68,8 @@ class MqttMessage
 	 */
 	this(MQTTAsync_message msg) {
 		this.msg = msg;
-		payload = cast(blob) msg.payload[0..msg.payloadlen];
+		payload = cast(blob) msg.payload[0..msg.payloadlen].dup();
 		assert(payload.length == msg.payloadlen);
-
 		this.msg.payload = cast(immutable(void)*) payload.ptr;
 		this.msg.payloadlen = cast(int) payload.length;
 	}
@@ -81,13 +80,9 @@ class MqttMessage
 	 * @param retained Whether the message should be retained by the broker.
 	 */
 	this(blob payload, int qos, bool retained) {
-		msg.struct_id = "MQTM";
-		msg.struct_version = 0;
 		setPayload(payload);
-		msg.qos = DFLT_QOS;
-		msg.retained = false;
-		msg.dup = 0;
-		msg.msgid = 0;
+		msg.qos = qos;
+		msg.retained = retained;
 	}
 	/**
 	 * Creates a message object.
@@ -95,14 +90,15 @@ class MqttMessage
 	 * @param qos The quality of service for the message.
 	 */
 	this(blob payload, int qos) {
-		this(payload, qos, false);
+		setPayload(payload);
+		msg.qos = qos;
 	}
 	/**
 	 * Creates a message object.
 	 * @param payload The payload of the messages.
 	 */
 	this(blob payload) {
-		this(payload, DFLT_QOS, false);
+		setPayload(payload);
 	}
 	/**
 	 * Creates a message object.
@@ -119,14 +115,21 @@ class MqttMessage
 	 * @param qos The quality of service for the message.
 	 */
 	this(string payload, int qos) {
-		this(cast(blob) payload, qos, false);
+		this(cast(blob) payload, qos);
 	}
 	/**
 	 * Creates a message object.
 	 * @param payload A string to use as the payload of the messages.
 	 */
 	this(string payload) {
-		this(cast(blob) payload, DFLT_QOS, false);
+		this(cast(blob) payload);
+	}
+	/**
+	 * Create a duplicate (deep) copy of the message.
+	 */
+	inout(MqttMessage) dup() inout {
+		auto m = new MqttMessage(this.msg);
+		return cast(inout(MqttMessage)) m;
 	}
 	/**
 	 * Gets the underlying C message structure.
@@ -144,14 +147,12 @@ class MqttMessage
 	/**
 	 * Gets the payload
 	 */
-	blob getPayload() immutable { return payload; }
-	blob getPayload() { return payload; }
+	blob getPayload() const { return payload; }
 	/**
 	 * Gets a string representation of the message payload.
 	 * @return A string representation of the message payload.
 	 */
-	string getPayloadStr() immutable { return cast(string) payload[0..$]; }
-	string getPayloadStr() { return cast(string) payload[0..$]; }
+	string getPayloadStr() const { return cast(string) payload[0..$]; }
 	/**
 	 * Returns the quality of service for this message.
 	 * @return The quality of service for this message.
@@ -206,7 +207,8 @@ class MqttMessage
 	 * Gets a string representation of the message payload.
 	 * @return A string representation of the message payload.
 	 */
-	string toStr() immutable { return cast(string) payload[0..$]; }
-	string toStr() { return cast(string) payload[0..$]; }
+	override string toString() const {
+		return cast(string) payload[0..$];
+	}
 }
 

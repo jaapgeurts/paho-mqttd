@@ -32,6 +32,8 @@ import MqttActionListener;
 import std.stdio;
 import std.string;
 import std.conv;
+import std.concurrency;
+import std.typecons;
 import core.memory;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -75,8 +77,8 @@ extern (C)
 		string topic = to!string(topicName);
 		auto m = new MqttMessage(*msg);
 
-		//cli.onMessageArrived(topic, cast(immutable) m);
-		cli.onMessageArrived(topic, m);
+		cli.onMessageArrived(topic, cast(immutable) m);
+		//cli.onMessageArrived(topic, m);
 
 		MQTTAsync_freeMessage(&msg);
 		MQTTAsync_free(topicName);
@@ -115,6 +117,8 @@ class MqttAsyncClient
 	/** A user-supplied callback object */
 	private MqttCallback callback = null;
 
+	private Tid msgTid;
+
 	/**
 	 * Helper to check a return value from the C library.
 	 * This will create and throw an exception if the return code indicated
@@ -142,10 +146,12 @@ class MqttAsyncClient
 	 * @param topic The topic on which the message arrived.
 	 * @param msg The message.
 	 */
-	private void onMessageArrived(string topic, MqttMessage msg) {
-		if (this.callback !is null) {
+	private void onMessageArrived(string topic, immutable MqttMessage msg) {
+		if (this.callback !is null)
 			this.callback.messageArrived(topic, msg);
-		}
+
+		if (msgTid != Tid.init)
+			msgTid.send(topic, rebindable(msg));
 	}
 	/**
 	 * Gets the underlying C client object
@@ -165,6 +171,13 @@ class MqttAsyncClient
 	 */
 	void setCallback(MqttCallback cb) {
 		this.callback = cb;
+		void* context = cast(void*) this;
+		MQTTAsync_setCallbacks(cli, context, &onConnectionLostCallback,
+							   &onMessageArrivedCallback, &onDeliveryCompleteCallback);
+	}
+
+	void setMessageThread(Tid msgTid) {
+		this.msgTid = msgTid;
 		void* context = cast(void*) this;
 		MQTTAsync_setCallbacks(cli, context, &onConnectionLostCallback,
 							   &onMessageArrivedCallback, &onDeliveryCompleteCallback);
