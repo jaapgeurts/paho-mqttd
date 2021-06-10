@@ -21,7 +21,7 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-import MQTTAsync;
+import Async;
 import std.conv;
 
 /////////////////////////////////////////////////////////////////////////////

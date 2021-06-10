@@ -21,9 +21,9 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-import MQTTAsync;
-import MqttWillOptions;
-import MqttSSLOptions;
+import Async;
+import WillOptions;
+import SSLOptions;
 import std.stdio;
 import std.string;
 import std.conv;

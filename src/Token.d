@@ -23,11 +23,11 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-import MQTTAsync;
-import MqttAsyncClient;
-import MqttException;
-import MqttActionListener;
-import MqttMessage;
+import Async;
+import AsyncClient;
+import MqttException : MqttException;
+import ActionListener;
+import Message;
 
 import std.stdio;
 import core.sync.condition;

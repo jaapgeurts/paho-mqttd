@@ -21,13 +21,13 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-import MQTTAsync;
-import MqttMessage;
-import MqttToken;
-import MqttException;
-import MqttCallback;
-import MqttConnectOptions;
-import MqttActionListener;
+import Async;
+import Message;
+import Token;
+import MqttException : MqttException;
+import Callback;
+import ConnectOptions;
+import ActionListener;
 
 import std.stdio;
 import std.string;
@@ -203,8 +203,8 @@ class MqttAsyncClient
 		auto tok = new MqttToken(this);
 
 		opt.context = cast(void*) tok;
-		opt.onSuccess = &MqttToken.onSuccess;
-		opt.onFailure = &MqttToken.onFailure;
+		opt.onSuccess = &Token.onSuccess;
+		opt.onFailure = &Token.onFailure;
 
 		// Lock down the MqttToken until the callback occurs.
 		tok.lockMem();
@@ -225,8 +225,8 @@ class MqttAsyncClient
 		auto tok = new MqttToken(this, userContext, listener);
 
 		opt.context = cast(void*) tok;
-		opt.onSuccess = &MqttToken.onSuccess;
-		opt.onFailure = &MqttToken.onFailure;
+		opt.onSuccess = &Token.onSuccess;
+		opt.onFailure = &Token.onFailure;
 
 		// Lock down the MqttToken until the callback occurs.
 		tok.lockMem();
@@ -244,8 +244,8 @@ class MqttAsyncClient
 		auto tok = new MqttToken(this);
 
 		opt.context = cast(void*) tok;
-		opt.onSuccess = &MqttToken.onSuccess;
-		opt.onFailure = &MqttToken.onFailure;
+		opt.onSuccess = &Token.onSuccess;
+		opt.onFailure = &Token.onFailure;
 
 		// Lock down the MqttToken until the callback occurs.
 		tok.lockMem();
@@ -297,8 +297,8 @@ class MqttAsyncClient
 		auto tok = new MqttToken(this, null, listener);
 
 		opt.context = cast(void*) tok;
-		opt.onSuccess = &MqttToken.onSuccess;
-		opt.onFailure = &MqttToken.onFailure;
+		opt.onSuccess = &Token.onSuccess;
+		opt.onFailure = &Token.onFailure;
 
 		// Lock down the MqttToken until the callback occurs.
 		tok.lockMem();
@@ -322,8 +322,8 @@ class MqttAsyncClient
 		auto tok = new MqttToken(this, userContext, listener);
 
 		opt.context = cast(void*) tok;
-		opt.onSuccess = &MqttToken.onSuccess;
-		opt.onFailure = &MqttToken.onFailure;
+		opt.onSuccess = &Token.onSuccess;
+		opt.onFailure = &Token.onFailure;
 
 		// Lock down the MqttToken until the callback occurs.
 		tok.lockMem();

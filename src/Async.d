@@ -1,5 +1,5 @@
 /* Converted to D from MQTTAsync.h by htod */
-module MQTTAsync;
+module Async;
 /*******************************************************************************
  * Copyright (c) 2009, 2015 IBM Corp.
  *

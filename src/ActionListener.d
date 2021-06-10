@@ -21,7 +21,7 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-import MqttToken;
+import Token;
 
 /////////////////////////////////////////////////////////////////////////////
 
