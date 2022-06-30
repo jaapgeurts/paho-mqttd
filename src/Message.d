@@ -210,5 +210,12 @@ class MqttMessage
 	override string toString() const {
 		return cast(string) payload[0..$];
 	}
+
+    // To silence "Warning: struct Rebindable has method toHash, however it cannot be called with"
+    // NOTE: now this object can't be used in hash dicts
+    override size_t toHash() scope const pure @safe nothrow @nogc
+    {
+        assert(0, "Not implemented!");
+    }
 }
 

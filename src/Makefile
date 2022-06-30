@@ -4,7 +4,7 @@
 # Still can't figure out how to do that with GDC. So a static library for GDC.
 #
  
-DC = dmd
+DC = ldc2
 #DC = gdc
 
 RM = rm -f

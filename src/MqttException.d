@@ -1,4 +1,6 @@
 // MqttException.d
+import Async;
+import std.conv : to;
 
 /*******************************************************************************
  * Copyright (c) 2015-2016 Frank Pagliughi <fpagliughi@mindspring.com>
@@ -24,7 +26,7 @@ class MqttException : Exception {
 	}
 
 	this (int reasonCode) {
-		super("MQTT Exception");
+        super(to!string(MQTTAsync_strerror(reasonCode)));
 		this.reasonCode = reasonCode;
 	}
 
