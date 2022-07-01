@@ -36,6 +36,13 @@ import std.concurrency;
 import std.typecons;
 import core.memory;
 
+enum NetworkStatus {
+    NETWORK_STATUS_CONNECTED = 1,
+    NETWORK_STATUS_CONNECTIONLOST,
+    /// MQTT v5.0 only
+    NETWORK_STATUS_DISCONNECTED
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Callbacks from the C library.
 //
@@ -93,6 +100,8 @@ extern (C) {
 
         auto cli = cast(MqttAsyncClient) context;
 
+        cli.onDeliveryComplete(cast(immutable) token);
+
     }
 
     void onConnectedCallback(void* context, char* cause) {
@@ -105,16 +114,17 @@ extern (C) {
         MQTTAsync_free(cause);
     }
 
-    void onDisconnectedCallback(void* context, MQTTProperties* properties, int reasonCode) {
-        if (context is null)
-            return;
+    // only MQTT v5.0
+    // void onDisconnectedCallback(void* context, MQTTProperties* properties, int reasonCode) {
+    //     if (context is null)
+    //         return;
 
-        auto cli = cast(MqttAsyncClient) context;
+    //     auto cli = cast(MqttAsyncClient) context;
 
-        cli.onDisconnected(cast(immutable) properties, reasonCode);
+    //     cli.onDisconnected(cast(immutable) properties, reasonCode);
 
-        // MQTTAsync_free(properties);
-    }
+    //     // MQTTAsync_free(properties);
+    // }
 
 }
 
@@ -167,7 +177,8 @@ class MqttAsyncClient {
         // TODO: add MQTTAsync_setConnected so that we get notified when connection is
         // re-established.
         MQTTAsync_setConnected(cli, p, &onConnectedCallback);
-        MQTTAsync_setDisconnected(cli, p, &onDisconnectedCallback);
+        // Only for MQTT v5.0
+        //MQTTAsync_setDisconnected(cli, p, &onDisconnectedCallback);
 
     }
 
@@ -189,16 +200,29 @@ class MqttAsyncClient {
             this.callback.connectionLost(cause);
 
         if (msgTid != Tid.init)
-            msgTid.send(cause);
+            msgTid.send(NetworkStatus.NETWORK_STATUS_CONNECTIONLOST, cause);
     }
 
     private void onConnected(string cause) {
-        stderr.writeln("Connected reason: ", cause);
+        if (this.callback !is null)
+            this.callback.connected(cause);
+
+        if (msgTid != Tid.init)
+            msgTid.send(NetworkStatus.NETWORK_STATUS_CONNECTED, cause);
     }
 
-    private void onDisconnected(immutable MQTTProperties* properties, int reasonCode) {
-        stderr.writeln("Disconnected. Reason: ", reasonCode);
+    private void onDeliveryComplete(MQTTAsync_token tok) {
+        // if (this.callback !is null)
+        //     this.callback.deliveryComplete(tok);
+
+        if (msgTid != Tid.init)
+            msgTid.send(tok);
     }
+
+    // Only for Mqtt 5.0
+    // private void onDisconnected(immutable MQTTProperties* properties, int reasonCode) {
+    //     stderr.writeln("Disconnected. Reason: ", reasonCode);
+    // }
 
     /**
 	 * Gets the underlying C client object

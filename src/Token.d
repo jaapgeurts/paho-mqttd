@@ -266,7 +266,7 @@ class MqttDeliveryToken : IMqttToken
 {
 	/** The client that is handling the message */
 	private MqttAsyncClient cli;
-	/** The integer token fot the message (the message ID) */
+	/** The integer token for the message (the message ID) */
 	private MQTTAsync_token msgId;
 	/** A reference to the message itself */
 	private MqttMessage msg;

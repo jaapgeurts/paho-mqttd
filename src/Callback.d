@@ -44,10 +44,18 @@ interface MqttCallback
 	 */
 	void messageArrived(const string topic, immutable MqttMessage msg);
 	/**
+     * TODO: NOT CALLED; IMPLEMENTATION NOT FINISHED
 	 * Called when delivery for a message has been completed, and all
 	 * acknowledgments have been received.
 	 * @param token The integer message identifier.
 	 */
 	void deliveryComplete(MqttDeliveryToken tok);
-};
+
+    /**
+     * Called when a connection has been established
+     * This is a good time to subscribe to topics
+     */
+    void connected(const string cause);
+
+}
 
