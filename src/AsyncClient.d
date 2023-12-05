@@ -182,6 +182,13 @@ class MqttAsyncClient {
 
     }
 
+    ~this() {
+        MQTTAsync_destroy(&cli);
+
+        auto p = cast(void*) this;
+        GC.removeRoot(p);
+    }
+
     /**
 	 * Callback handler for incoming messages on this client.
 	 * @param topic The topic on which the message arrived.
