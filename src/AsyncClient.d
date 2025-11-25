@@ -33,7 +33,6 @@ import std.stdio;
 import std.string;
 import std.conv;
 import std.concurrency;
-import std.typecons;
 
 import core.memory;
 
@@ -78,6 +77,7 @@ extern (C) {
 	 * @param response
 	 */
     int onMessageArrivedCallback(void* context, char* topicName, int topicLen, MQTTAsync_message* msg) {
+
 
         if (context is null)
             return 0;
@@ -210,7 +210,7 @@ class MqttAsyncClient {
         }
 
         if (msgTid != Tid.init)
-            msgTid.send(topic, rebindable(msg));
+            msgTid.send(topic, msg);
     }
 
     private void onConnectionLost(string cause) {
