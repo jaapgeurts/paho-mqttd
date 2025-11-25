@@ -192,8 +192,6 @@ class MqttAsyncClient {
     }
 
     ~this() {
-
-
         MQTTAsync_destroy(&cli);
 
         auto p = cast(void*) this;

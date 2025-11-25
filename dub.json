@@ -1,14 +1,15 @@
 {
 	"name": "paho-mqttd",
 	"authors": [
-		"Frank Pagliughi"
+		"Frank Pagliughi",
+        "Jaap Geurts"
 	],
 	"description": "The Eclipse Paho MQTT D Client for Posix and Windows",
 	"copyright": "Copyright © 2016, Frank Pagliughi",
 	"version": "0.1.0",
 	"license": "EPL-1.0",
 	"homepage": "https://github.com/eclipse/paho.mqtt.d",
-	"targetType": "dynamicLibrary",
+	"targetType": "staticLibrary",
 	"targetPath": "./lib/",
 	"libs": ["paho-mqtt3as"],
 	"configurations": [
