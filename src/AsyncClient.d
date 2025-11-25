@@ -34,6 +34,7 @@ import std.string;
 import std.conv;
 import std.concurrency;
 import std.typecons;
+
 import core.memory;
 
 enum NetworkStatus {
@@ -58,6 +59,7 @@ extern (C) {
 	 * @param cause
 	 */
     void onConnectionLostCallback(void* context, char* cause) {
+
         if (context is null)
             return;
 
@@ -68,6 +70,7 @@ extern (C) {
 
         if (cause !is null)
             MQTTAsync_free(cause);
+
     }
     /**
 	 * Callback from an unsuccessful connection.
@@ -75,6 +78,7 @@ extern (C) {
 	 * @param response
 	 */
     int onMessageArrivedCallback(void* context, char* topicName, int topicLen, MQTTAsync_message* msg) {
+
         if (context is null)
             return 0;
 
@@ -89,8 +93,10 @@ extern (C) {
         MQTTAsync_freeMessage(&msg);
         MQTTAsync_free(topicName);
 
+
         // TODO: Should the user code determine the return value?
         // The Java version does doesn't seem to...
+
         return (1);
     }
 
@@ -105,13 +111,15 @@ extern (C) {
     }
 
     void onConnectedCallback(void* context, char* cause) {
+
         if (context is null)
             return;
 
         auto cli = cast(MqttAsyncClient) context;
 
         cli.onConnected(to!string(cause));
-        MQTTAsync_free(cause);
+        if (cause != null)
+            MQTTAsync_free(cause);
     }
 
     // only MQTT v5.0
@@ -169,6 +177,7 @@ class MqttAsyncClient {
         GC.addRoot(p);
         GC.setAttr(p, GC.BlkAttr.NO_MOVE);
 
+
         this.serverURI = serverURI;
         this.clientId = clientId;
         chkRet(MQTTAsync_create(&cli, std.string.toStringz(serverURI),
@@ -182,38 +191,57 @@ class MqttAsyncClient {
 
     }
 
+    ~this() {
+
+
+        MQTTAsync_destroy(&cli);
+
+        auto p = cast(void*) this;
+        GC.removeRoot(p);
+    }
+
     /**
 	 * Callback handler for incoming messages on this client.
 	 * @param topic The topic on which the message arrived.
 	 * @param msg The message.
 	 */
     private void onMessageArrived(string topic, immutable MqttMessage msg) {
-        if (this.callback !is null)
+        if (this.callback !is null) {
             this.callback.messageArrived(topic, msg);
+            return;
+        }
 
         if (msgTid != Tid.init)
             msgTid.send(topic, rebindable(msg));
     }
 
     private void onConnectionLost(string cause) {
-        if (this.callback !is null)
+        if (this.callback !is null) {
             this.callback.connectionLost(cause);
+            return;
+        }
 
         if (msgTid != Tid.init)
             msgTid.send(NetworkStatus.NETWORK_STATUS_CONNECTIONLOST, cause);
     }
 
     private void onConnected(string cause) {
-        if (this.callback !is null)
+        
+        if (this.callback !is null) {
             this.callback.connected(cause);
+            return;
+        }
 
         if (msgTid != Tid.init)
             msgTid.send(NetworkStatus.NETWORK_STATUS_CONNECTED, cause);
     }
 
     private void onDeliveryComplete(MQTTAsync_token tok) {
-        // if (this.callback !is null)
+        // if (this.callback !is null) {
         //     this.callback.deliveryComplete(tok);
+        //     return;
+        // }
+        return;
 
         if (msgTid != Tid.init)
             msgTid.send(tok);

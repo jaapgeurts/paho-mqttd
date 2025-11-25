@@ -27,6 +27,11 @@ import std.string;
 import std.conv;
 import core.time;
 
+extern (C) int onSllErrorCallback(const char* str, size_t len, void* u) {
+	MqttSSLOptions opts = cast(MqttSSLOptions)u;
+	return opts.ssl_error_cb(str[0..len].idup);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -46,6 +51,16 @@ class MqttSSLOptions
 	private string privateKeyPassword;
 	/** The list of cipher suites for the SSL handshake */
 	private string enabledCipherSuites;
+	/** True/False option to enable verification of the server certificate */
+	private bool enableServerCertAuth;
+	/** The SSL/TLS version to use. Specify one of MQTT_SSL_VERSION_DEFAULT (0), MQTT_SSL_VERSION_TLS_1_0 (1), MQTT_SSL_VERSION_TLS_1_1 (2) or MQTT_SSL_VERSION_TLS_1_2 (3). Only used if struct_version is >= 1.  */
+ 	private int sslVersion;
+	/** Whether to carry out post-connect checks, including that a certificate matches the given host name. Exists only if struct_version >= 2 */
+	private bool verify;
+	/** From the OpenSSL documentation: If CApath is not NULL, it points to a directory containing CA certificates in PEM format. Exists only if struct_version >= 2 */
+	private string caPath;
+	/** Callback function for OpenSSL error handler ERR_print_errors_cb Exists only if struct_version >= 3 */
+	private int function(string str) ssl_error_cb;
 
 	/**
 	 * Constructs the SSL/TSL options.
@@ -140,8 +155,33 @@ class MqttSSLOptions
 	 * @return Whether we verify the server certificate.
 	 */
 	bool getEnableServerCertAuth() const {
-		return opts.enableServerCertAuth != 0;
+		return enableServerCertAuth;
 	}
+	/** The SSL/TLS version to use. Specify one of
+	 * MQTT_SSL_VERSION_DEFAULT (0),
+	 * MQTT_SSL_VERSION_TLS_1_0 (1),
+	 * MQTT_SSL_VERSION_TLS_1_1 (2)
+	 * or MQTT_SSL_VERSION_TLS_1_2 (3).
+	 * Only used if struct_version is >= 1.  */
+ 	int getSslVersion() const {
+		return sslVersion;
+	}
+
+	/** Whether to carry out post-connect checks,
+	 * including that a certificate matches the given host name.
+	 * Exists only if struct_version >= 2 */
+	bool getVerify() const {
+		return verify;
+	}
+
+	/** From the OpenSSL documentation:
+	 * If CApath is not NULL, it points to a directory
+	 * containing CA certificates in PEM format.
+	 * Exists only if struct_version >= 2 */
+	string getCAPath() const {
+		return caPath;
+	}
+
 	/**
 	 * Sets the name of the file containing the public digital certificates
 	 * trusted by the client.
@@ -150,7 +190,8 @@ class MqttSSLOptions
 	 */
 	void setTrustStore(string trustStore) {
 		this.trustStore = trustStore;
-		opts.trustStore = std.string.toStringz(this.trustStore);
+		if (!trustStore.empty)
+		    opts.trustStore = std.string.toStringz(this.trustStore);
 	}
 	/**
 	 * Sets the name of the file containing the public certificate chain of
@@ -160,7 +201,8 @@ class MqttSSLOptions
 	 */
 	void setKeyStore(string keyStore) {
 		this.keyStore = keyStore;
-		opts.keyStore = std.string.toStringz(this.keyStore);
+		if (!keyStore.empty)
+			opts.keyStore = std.string.toStringz(this.keyStore);
 	}
 	/**
 	 * Sets the file containing the client's private key.
@@ -168,7 +210,8 @@ class MqttSSLOptions
 	 */
 	void setPrivateKey(string privateKey) {
 		this.privateKey = privateKey;
-		opts.privateKey = std.string.toStringz(this.privateKey);
+		if (!privateKey.empty)
+			opts.privateKey = std.string.toStringz(this.privateKey);
 	}
 	/**
 	 * Sets the password to load the client's privateKey (if encrypted).
@@ -177,7 +220,8 @@ class MqttSSLOptions
 	 */
 	void setPrivateKeyPassword(string privateKeyPassword) {
 		this.privateKeyPassword = privateKeyPassword;
-		opts.privateKeyPassword = std.string.toStringz(this.privateKeyPassword);
+		if (!privateKeyPassword.empty)
+			opts.privateKeyPassword = std.string.toStringz(this.privateKeyPassword);
 	}
 	/**
 	 * Sets the list of cipher suites that the client will present to the server
@@ -200,14 +244,58 @@ class MqttSSLOptions
 	 */
 	void setEnabledCipherSuites(string enabledCipherSuites) {
 		this.enabledCipherSuites = enabledCipherSuites;
-		opts.enabledCipherSuites = std.string.toStringz(this.enabledCipherSuites);
+		if (!enabledCipherSuites.empty)
+			opts.enabledCipherSuites = std.string.toStringz(this.enabledCipherSuites);
 	}
 	/**
 	 * Sets the option to verify the server certificate.
 	 * @param enablServerCertAuth Whether to verify the server certificate.
 	 */
 	void setEnableServerCertAuth(bool enablServerCertAuth) {
-		opts.enableServerCertAuth = (enablServerCertAuth) ? 1 : 0;
+		this.enableServerCertAuth = enableServerCertAuth;
+		opts.enableServerCertAuth = enablServerCertAuth ? 1 : 0;
 	}
+	/** The SSL/TLS version to use. Specify one of
+	 * MQTT_SSL_VERSION_DEFAULT (0),
+	 * MQTT_SSL_VERSION_TLS_1_0 (1),
+	 * MQTT_SSL_VERSION_TLS_1_1 (2)
+	 * or MQTT_SSL_VERSION_TLS_1_2 (3).
+	 * Only used if struct_version is >= 1.  */
+ 	void setSslVersion(int sslVersion) {
+		this.sslVersion = sslVersion;
+		opts.sslVersion = sslVersion;
+		if (opts.struct_version < 1)
+			opts.struct_version = 1;
+	}
+	/** Whether to carry out post-connect checks, 
+	 * including that a certificate matches the given host name.
+	 * Exists only if struct_version >= 2 */
+	void setVerify(bool verify) {
+		this.verify = verify;
+		opts.verify = verify ? 1 : 0;
+		if (opts.struct_version < 2)
+			opts.struct_version = 2;
+	}
+
+	/** From the OpenSSL documentation:
+	 * If CApath is not NULL, it points to a directory
+	 * containing CA certificates in PEM format.
+	 * Exists only if struct_version >= 2 */
+	void setCAPath(string caPath) {
+		this.caPath = caPath;
+		if (!caPath.empty)
+			opts.caPath = std.string.toStringz(this.caPath);
+	}
+
+	/** Callback function for OpenSSL error handler
+	 * ERR_print_errors_cb Exists only if struct_version >= 3 */
+	void setSslErrorCallback(int function(string) cb) {
+		this.ssl_error_cb = cb;
+		opts.ssl_error_cb = &onSllErrorCallback;
+		opts.ssl_error_context = cast(void*)this;
+		if (opts.struct_version < 3)
+			opts.struct_version = 3;
+	}
+
 }
 

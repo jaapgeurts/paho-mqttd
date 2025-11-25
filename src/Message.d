@@ -152,7 +152,7 @@ class MqttMessage
 	 * Gets a string representation of the message payload.
 	 * @return A string representation of the message payload.
 	 */
-	string getPayloadStr() const { return cast(string) payload[0..$]; }
+	string getPayloadStr() const { return cast(string)(payload[0..$]).idup; }
 	/**
 	 * Returns the quality of service for this message.
 	 * @return The quality of service for this message.

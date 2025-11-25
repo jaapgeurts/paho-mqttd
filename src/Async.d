@@ -398,6 +398,9 @@ struct MQTTAsync_responseOptions
 	MQTTAsync_token token;
 }
 
+extern (C) alias MQTTAsync_onSSLError
+	= int function(const char* str, size_t len, void* u);
+
 enum MQTTPropertyCodes {
    MQTTPROPERTY_CODE_UNDEFINED = 0,
    MQTTPROPERTY_CODE_PAYLOAD_FORMAT_INDICATOR = 1,  
@@ -589,6 +592,11 @@ struct MQTTAsync_SSLOptions
 	const(char)* privateKeyPassword;
 	const(char)* enabledCipherSuites;
 	int enableServerCertAuth = 1;
+  int sslVersion = 0;
+  int	verify = 0;
+  const(char)* caPath;
+  int function(const char* str, size_t len, void* u) ssl_error_cb;
+  void *ssl_error_context;
 }
 
 /**

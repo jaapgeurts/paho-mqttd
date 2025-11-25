@@ -18,6 +18,7 @@ import std.conv : to;
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
+
 class MqttException : Exception {
 	private int reasonCode;
 
@@ -31,4 +32,5 @@ class MqttException : Exception {
 	}
 
 	int getReasonCode() { return reasonCode; }
+
 }
